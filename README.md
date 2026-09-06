@@ -8,6 +8,24 @@ It is **not** a reproduction of the Persistence repository and it is **not** a r
 
 The sequence is deliberately cumulative. Each document should be read as adding only what the previous documents have earned.
 
+## Current evidential update
+
+The 6 × 3 × 3 grammar has now survived a broad adversarial stress test under **strict pre-individuation**.
+
+The test froze the unresolved condition, landing, completion condition, and survivor before coordinate assignment, then attacked missing values, same-axis overlap, border collapse, and prospective generativity across 132 hostile completions spanning 36 domain families.
+
+Result:
+
+- 0 frozen missing-value failures;
+- 0 indispensable same-axis overlaps;
+- 0 surviving border collapses;
+- 0 prospective generative failures;
+- 20/20 sampled coordinates successfully constrained prospective generation.
+
+This does **not** establish universal closure. It does materially strengthen the case that the 54 behave as a genuine candidate grammar of individually completed intelligibilities rather than as an arbitrary taxonomy.
+
+See [`14_adversarial_stress_test.md`](14_adversarial_stress_test.md) for the full result and the remaining falsification targets.
+
 ## Reading order
 
 1. `00_refractory_ground.md`  
@@ -30,6 +48,9 @@ The sequence is deliberately cumulative. Each document should be read as adding 
 
 7. `06_gpt_refractory_positioning.md`  
    A compact positioning document for use with a GPT. It tells the model how to preserve cumulative reasoning, how to object properly, and how not to reset the inquiry by substituting stronger claims for weaker ones.
+
+8. `14_adversarial_stress_test.md`  
+   Records the current adversarial result: 132 pre-individuated hostile completions, explicit border attacks, prospective generation, reverse recovery, and the present judgment that the 54 survive this test while universal closure remains open.
 
 ## Governing discipline
 
