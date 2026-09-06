@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f1e8">
+<title>Intelligibility</title>
+<meta name="description" content="A plain-language derivation of relational intelligibility.">
+<style>
+:root{--paper:#f5f1e8;--ink:#181714;--muted:#777167;--line:#d8d0c2;--measure:42rem}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink)}
+body{font-family:Georgia,'Times New Roman',serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+#book{height:100dvh;display:flex;transition:transform .38s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.page{flex:0 0 100vw;height:100dvh;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin;touch-action:pan-y}
+.page-inner{width:min(var(--measure),calc(100% - 2.5rem));margin:0 auto;padding:12vh 0 18vh}
+.cover .page-inner{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding-top:8vh}
+.kicker{font:600 .72rem/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2rem}
+.cover h1{font-size:clamp(3rem,10vw,7rem);line-height:.92;letter-spacing:-.055em;margin:0 0 2rem;max-width:9ch;font-weight:500}
+.cover p{font-size:clamp(1.15rem,2.6vw,1.55rem);line-height:1.55;max-width:31rem;margin:.5rem 0}
+.start{margin-top:2.5rem;border:0;border-bottom:1px solid var(--ink);background:none;padding:.25rem 0;align-self:flex-start;cursor:pointer}
+article{font-size:clamp(1.05rem,2.2vw,1.22rem);line-height:1.72}
+article h1{font-size:clamp(2.2rem,6vw,4.2rem);line-height:1.02;letter-spacing:-.045em;font-weight:500;margin:0 0 2.6rem}
+article h2{font-size:1.65em;line-height:1.15;font-weight:500;margin:3.2em 0 .8em}
+article h3{font-size:1.18em;line-height:1.3;margin:2.4em 0 .6em}
+article p{margin:1.15em 0}
+article blockquote{margin:2.2em 0;padding:.1em 0 .1em 1.2em;border-left:2px solid var(--ink);font-size:1.08em}
+article ul,article ol{padding-left:1.4em;margin:1.2em 0}
+article li{margin:.45em 0}
+article hr{border:0;border-top:1px solid var(--line);margin:3.5em 0}
+article code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
+article pre{overflow:auto;padding:1rem;border:1px solid var(--line)}
+article a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.18em}
+article strong{font-weight:700}
+.nav{position:fixed;z-index:10;left:0;right:0;bottom:0;padding:1rem max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;pointer-events:none;background:linear-gradient(transparent,var(--paper) 45%)}
+.nav button{pointer-events:auto;border:0;background:none;padding:.65rem .8rem;cursor:pointer;font-family:system-ui,sans-serif;font-size:.82rem;letter-spacing:.04em}
+.nav button:disabled{opacity:.2;cursor:default}
+.status{font:500 .72rem/1 system-ui,sans-serif;color:var(--muted);letter-spacing:.08em}
+.progress{position:fixed;z-index:11;top:0;left:0;height:2px;background:var(--ink);width:0;transition:width .35s ease}
+.loading{font:500 .8rem/1.4 system-ui,sans-serif;color:var(--muted)}
+@media (min-width:900px){.page-inner{padding-top:10vh}.nav{padding-left:2rem;padding-right:2rem}}
+@media (prefers-reduced-motion:reduce){#book,.progress{transition:none}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<main id="book" aria-live="polite">
+  <section class="page cover" data-title="Cover">
+    <div class="page-inner">
+      <div class="kicker">A plain-language derivation</div>
+      <h1>Intelligibility</h1>
+      <p><strong>Intelligibility is relation.</strong></p>
+      <p>Relation constrains what can follow. When the relation becomes sufficient, it completes. When completed relation can be reconstructed through another carrier, it persists.</p>
+      <button class="start" type="button" onclick="go(1)">Begin reading →</button>
+    </div>
+  </section>
+</main>
+<nav class="nav" aria-label="Book navigation">
+  <button id="prev" type="button" aria-label="Previous chapter">← Previous</button>
+  <span class="status" id="status">1 / 8</span>
+  <button id="next" type="button" aria-label="Next chapter">Next →</button>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+const chapters=[
+  '00_refractory_ground.md',
+  '01_first_derivation_transmission_requires_factorization.md',
+  '02_second_derivation_three_functions_are_factors.md',
+  '03_third_derivation_recurrent_values.md',
+  '04_fourth_derivation_composition_and_54.md',
+  '05_reflexive_constraint_on_evaluation.md',
+  '06_gpt_refractory_positioning.md'
+];
+const book=document.getElementById('book');
+const prev=document.getElementById('prev');
+const next=document.getElementById('next');
+const status=document.getElementById('status');
+const progress=document.getElementById('progress');
+let current=0;
+
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+async function load(){
+  for(const file of chapters){
+    const page=document.createElement('section');
+    page.className='page';
+    page.dataset.title=file;
+    page.innerHTML='<div class="page-inner"><div class="loading">Loading…</div></div>';
+    book.appendChild(page);
+    try{
+      const r=await fetch(file,{cache:'no-cache'});
+      if(!r.ok) throw new Error(r.status+' '+r.statusText);
+      const md=await r.text();
+      page.querySelector('.page-inner').innerHTML='<article>'+marked.parse(md)+'</article>';
+      const h=page.querySelector('h1');
+      if(h) page.dataset.title=h.textContent;
+    }catch(e){
+      page.querySelector('.page-inner').innerHTML='<article><h1>Unable to load chapter</h1><p><code>'+esc(file)+'</code></p><p>'+esc(String(e))+'</p></article>';
+    }
+  }
+  update(false);
+}
+
+function go(i){
+  const total=chapters.length+1;
+  current=Math.max(0,Math.min(i,total-1));
+  update(true);
+}
+
+function update(resetScroll){
+  const total=chapters.length+1;
+  book.style.transform='translate3d('+(-current*100)+'vw,0,0)';
+  prev.disabled=current===0;
+  next.disabled=current===total-1;
+  status.textContent=(current+1)+' / '+total;
+  progress.style.width=((current/(total-1))*100)+'%';
+  if(resetScroll){const p=book.children[current];if(p)p.scrollTo({top:0,behavior:'instant'})}
+  history.replaceState(null,'','#'+(current===0?'cover':String(current).padStart(2,'0')));
+}
+
+prev.addEventListener('click',()=>go(current-1));
+next.addEventListener('click',()=>go(current+1));
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown')go(current+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp')go(current-1);
+});
+
+let x0=0,y0=0,t0=0;
+book.addEventListener('pointerdown',e=>{x0=e.clientX;y0=e.clientY;t0=Date.now()},{passive:true});
+book.addEventListener('pointerup',e=>{
+  const dx=e.clientX-x0,dy=e.clientY-y0,dt=Date.now()-t0;
+  if(dt<700&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.25){go(current+(dx<0?1:-1))}
+},{passive:true});
+
+const hash=location.hash.replace('#','');
+if(hash==='cover')current=0;
+else if(/^\d+$/.test(hash))current=Math.min(Number(hash),chapters.length);
+load();
+</script>
+</body>
+</html>
